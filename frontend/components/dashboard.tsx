@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { ArrowDownLeft, ArrowUpRight, CalendarDays, Check, CheckCheck, ChevronLeft, ChevronRight, CircleDollarSign, Clock3, FileChartColumn, LayoutDashboard, LogOut, Menu, Pencil, Plus, Repeat2, Search, Settings, Tags, Trash2, X } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Calculator, CalendarDays, Check, CheckCheck, ChevronLeft, ChevronRight, CircleDollarSign, Clock3, FileChartColumn, LayoutDashboard, LogOut, Menu, Pencil, Plus, Repeat2, Search, Settings, Tags, Trash2, X } from "lucide-react";
 
 import { CategoriesView } from "@/components/categories/categories-view";
+import { CalculatorPanel } from "@/components/calculator/calculator-panel";
 import { EntryForm } from "@/components/entry-form";
 import { RecurrencesView } from "@/components/recurrences/recurrences-view";
 import { ReportsView } from "@/components/reports/reports-view";
@@ -38,6 +39,8 @@ export function Dashboard({ user }: { user: User }) {
   const [editing, setEditing] = useState<Entry | null>(null);
   const [saving, setSaving] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
+  const [initialAmountCents, setInitialAmountCents] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -63,7 +66,7 @@ export function Dashboard({ user }: { user: User }) {
   }
 
   function changeMonth(nextMonth: string) { setLoading(true); setError(""); setMonth(nextMonth); }
-  function openNew(kind: EntryKind) { setEditing(null); setFormKind(kind); setFormOpen(true); }
+  function openNew(kind: EntryKind, amountCents = 0) { setEditing(null); setFormKind(kind); setInitialAmountCents(amountCents); setFormOpen(true); }
 
   async function saveEntry({ payload, installment_count }: EntrySubmission) {
     setSaving(true);
@@ -90,15 +93,16 @@ export function Dashboard({ user }: { user: User }) {
   return <div className="min-h-screen lg:grid lg:grid-cols-[248px_1fr]">
     <Sidebar user={user} active={view} mobileOpen={mobileNav} onNavigate={(next) => { setView(next); setMobileNav(false); }} onClose={() => setMobileNav(false)} />
     <main className="min-w-0 px-4 pb-10 pt-4 sm:px-6 lg:px-8 lg:py-7 xl:px-10">
-      <header className="mb-6 flex items-center justify-between gap-4 pr-14 sm:pr-16"><div className="flex items-center gap-3"><button onClick={() => setMobileNav(true)} className="rounded-xl border border-[#dcded6] bg-[#fbfbf8] p-2.5 lg:hidden"><Menu size={20} /></button><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#808781]">{heading.eyebrow}</p><h1 className="mt-0.5 text-2xl font-semibold tracking-[-0.035em] sm:text-[28px]">{heading.title}</h1></div></div>{view === "overview" && <button onClick={() => openNew("expense")} className="flex items-center gap-2 rounded-full bg-[#17211c] px-4 py-2.5 text-sm font-bold text-white sm:px-5"><Plus size={18} /><span className="hidden sm:inline">Novo lançamento</span><span className="sm:hidden">Novo</span></button>}</header>
+      <header className="mb-6 flex items-center justify-between gap-4 pr-14 sm:pr-16"><div className="flex min-w-0 items-center gap-3"><button onClick={() => setMobileNav(true)} className="rounded-xl border border-[#dcded6] bg-[#fbfbf8] p-2.5 lg:hidden"><Menu size={20} /></button><div className="min-w-0"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#808781]">{heading.eyebrow}</p><h1 className="truncate text-2xl font-semibold tracking-[-0.035em] sm:mt-0.5 sm:text-[28px]">{heading.title}</h1></div></div><div className="flex shrink-0 items-center gap-2"><button type="button" onClick={() => setCalculatorOpen(true)} title="Abrir calculadora" aria-label="Abrir calculadora" className="flex h-11 w-11 items-center justify-center rounded-full border border-[#dcded6] bg-[#fbfbf8] text-[#56615b] panel-shadow"><Calculator size={20} /></button>{view === "overview" && <button onClick={() => openNew("expense")} className="flex items-center gap-2 rounded-full bg-[#17211c] px-3 py-2.5 text-sm font-bold text-white sm:px-5"><Plus size={18} /><span className="hidden sm:inline">Novo lançamento</span></button>}</div></header>
       {error && <div className="mb-5 flex items-center justify-between rounded-2xl border border-[#e7bdb7] bg-[#fff1ee] px-4 py-3 text-sm text-[#923d34]"><span>{error}</span><button onClick={() => setError("")}><X size={18} /></button></div>}
-      {view === "overview" && <Overview month={month} data={data} entries={entries} categories={categories} loading={loading} search={search} filter={filter} onSearch={setSearch} onFilter={setFilter} onMonth={changeMonth} onAdd={openNew} onEdit={(entry) => { setEditing(entry); setFormKind(entry.kind); setFormOpen(true); }} onDelete={removeEntry} onToggle={toggleStatus} onPayAll={() => void payAllExpenses()} />}
+      {view === "overview" && <Overview month={month} data={data} entries={entries} categories={categories} loading={loading} search={search} filter={filter} onSearch={setSearch} onFilter={setFilter} onMonth={changeMonth} onAdd={openNew} onEdit={(entry) => { setEditing(entry); setFormKind(entry.kind); setInitialAmountCents(0); setFormOpen(true); }} onDelete={removeEntry} onToggle={toggleStatus} onPayAll={() => void payAllExpenses()} />}
       {view === "categories" && <CategoriesView categories={categories} onCreate={async (name, kind, color) => { await addCategory(name, kind, color); }} onDelete={removeCategory} />}
       {view === "recurrences" && <RecurrencesView categories={categories} onCreateCategory={addCategory} onChanged={reloadDashboard} />}
       {view === "reports" && <ReportsView />}
       {view === "settings" && <AccountSettings user={user} />}
     </main>
-    {formOpen && <EntryForm month={month} entry={editing} initialKind={formKind} categories={categories} saving={saving} onClose={() => { setFormOpen(false); setEditing(null); }} onSave={saveEntry} onCreateCategory={addCategory} />}
+    {formOpen && <EntryForm month={month} entry={editing} initialKind={formKind} initialAmountCents={initialAmountCents} categories={categories} saving={saving} onClose={() => { setFormOpen(false); setEditing(null); setInitialAmountCents(0); }} onSave={saveEntry} onCreateCategory={addCategory} />}
+    <CalculatorPanel open={calculatorOpen} onClose={() => setCalculatorOpen(false)} onCreateEntry={openNew} />
   </div>;
 }
 

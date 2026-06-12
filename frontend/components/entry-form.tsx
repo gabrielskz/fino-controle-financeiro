@@ -10,6 +10,7 @@ interface EntryFormProps {
   month: string;
   entry: Entry | null;
   initialKind: EntryKind;
+  initialAmountCents?: number;
   categories: Category[];
   saving: boolean;
   onClose: () => void;
@@ -17,11 +18,11 @@ interface EntryFormProps {
   onCreateCategory: (name: string, kind: EntryKind) => Promise<Category>;
 }
 
-export function EntryForm({ month, entry, initialKind, categories, saving, onClose, onSave, onCreateCategory }: EntryFormProps) {
+export function EntryForm({ month, entry, initialKind, initialAmountCents = 0, categories, saving, onClose, onSave, onCreateCategory }: EntryFormProps) {
   const [kind, setKind] = useState<EntryKind>(entry?.kind ?? initialKind);
   const availableCategories = useMemo(() => categories.filter((item) => item.kind === kind), [categories, kind]);
   const [description, setDescription] = useState(entry?.description ?? "");
-  const [amount, setAmount] = useState(entry ? currencyInput(entry.amount_cents) : "");
+  const [amount, setAmount] = useState(entry ? currencyInput(entry.amount_cents) : initialAmountCents ? currencyInput(initialAmountCents) : "");
   const [category, setCategory] = useState(entry?.category ?? categories.find((item) => item.kind === initialKind)?.name ?? "");
   const [status, setStatus] = useState<EntryStatus>(entry?.status ?? (initialKind === "expense" ? "pending" : "received"));
   const [dueDate, setDueDate] = useState(entry?.due_date ?? "");

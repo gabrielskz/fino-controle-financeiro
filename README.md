@@ -19,6 +19,7 @@ Aplicação web de controle financeiro pessoal para acompanhar receitas, despesa
 - Exportação de dados em CSV e PDF
 - Alteração de e-mail e senha dentro do aplicativo
 - Exclusão permanente da conta e dos dados
+- Calculadora integrada com envio do resultado para um novo lançamento
 - Interface responsiva para computador e celular
 - Dados isolados por usuário com Row Level Security
 
