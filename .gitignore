@@ -1,0 +1,11 @@
+*.tmp
+.env
+.env.local
+.env.*.local
+!.env.local.example
+.vercel/
+.next/
+node_modules/
+.npm-cache/
+coverage/
+dist/
