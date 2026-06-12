@@ -136,8 +136,24 @@ html.dark [class~="bg-[#f8e9e6]"] {
 }
 
 html.dark [class~="bg-[#fff0ed]"],
-html.dark [class~="bg-[#fff1ee]"] {
+html.dark [class~="bg-[#fff1ee]"],
+html.dark [class~="bg-[#fff8f6]"] {
   background-color: #3c2421 !important;
+}
+
+html.dark [class~="bg-[#eee9fa]"] {
+  background-color: #302841 !important;
+}
+
+html.dark [class~="bg-[#efffc1]"] {
+  background-color: #33401f !important;
+}
+
+html.dark [class~="border-[#b9c8bd]"],
+html.dark [class~="border-[#cfd3cb]"],
+html.dark [class~="border-[#e2c5c0]"],
+html.dark [class~="border-[#e7bdb7]"] {
+  border-color: #60433e !important;
 }
 
 html.dark [class~="text-[#287055]"] {
@@ -148,6 +164,18 @@ html.dark [class~="text-[#a43f35]"],
 html.dark [class~="text-[#a94c40]"],
 html.dark [class~="text-[#923d34]"] {
   color: #f19a8e !important;
+}
+
+html.dark [class~="text-[#536628]"] {
+  color: #d8ff65 !important;
+}
+
+html.dark [class~="text-[#664ba0]"] {
+  color: #c6aaf7 !important;
+}
+
+html.dark [class~="text-[#7d6864]"] {
+  color: #c5aaa4 !important;
 }
 
 html.dark .panel-shadow {

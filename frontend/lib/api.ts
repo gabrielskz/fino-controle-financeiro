@@ -190,6 +190,40 @@ export async function createEntry(payload: EntryPayload): Promise<Entry> {
   return data as Entry;
 }
 
+function shiftEntryMonth(month: string, amount: number): string {
+  const [year, monthNumber] = month.split("-").map(Number);
+  const date = new Date(year, monthNumber - 1 + amount, 1);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function shiftDueDate(dueDate: string | null, month: string, amount: number): string | null {
+  if (!dueDate) return null;
+  const day = Number(dueDate.slice(8, 10));
+  return dueDateForMonth(shiftEntryMonth(month, amount), day);
+}
+
+export async function createInstallmentEntries(
+  payload: EntryPayload,
+  installmentCount: number,
+): Promise<Entry[]> {
+  const groupId = crypto.randomUUID();
+  const baseAmount = Math.floor(payload.amount_cents / installmentCount);
+  const remainder = payload.amount_cents % installmentCount;
+  const rows = Array.from({ length: installmentCount }, (_, index) => ({
+    ...payload,
+    amount_cents: baseAmount + (index < remainder ? 1 : 0),
+    status: "pending",
+    reference_month: shiftEntryMonth(payload.reference_month, index),
+    due_date: shiftDueDate(payload.due_date, payload.reference_month, index),
+    installment_group_id: groupId,
+    installment_number: index + 1,
+    installment_total: installmentCount,
+  }));
+  const { data, error } = await createClient().from("entries").insert(rows).select();
+  throwIfError(error);
+  return (data ?? []) as Entry[];
+}
+
 export async function updateEntry(id: string, payload: Partial<EntryPayload>): Promise<Entry> {
   const { data, error } = await createClient().from("entries").update(payload).eq("id", id).select().single();
   throwIfError(error);
@@ -198,6 +232,23 @@ export async function updateEntry(id: string, payload: Partial<EntryPayload>): P
 
 export async function deleteEntry(id: string): Promise<void> {
   const { error } = await createClient().from("entries").delete().eq("id", id);
+  throwIfError(error);
+}
+
+export async function markMonthExpensesPaid(month: string): Promise<number> {
+  const { data, error } = await createClient()
+    .from("entries")
+    .update({ status: "paid" })
+    .eq("reference_month", month)
+    .eq("kind", "expense")
+    .eq("status", "pending")
+    .select("id");
+  throwIfError(error);
+  return data?.length ?? 0;
+}
+
+export async function deleteOwnAccount(): Promise<void> {
+  const { error } = await createClient().rpc("delete_own_account");
   throwIfError(error);
 }
 

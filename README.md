@@ -10,11 +10,15 @@ Aplicação web de controle financeiro pessoal para acompanhar receitas, despesa
 
 - Cadastro, login e recuperação de senha
 - Receitas e despesas mensais
+- Compras parceladas com criação automática das parcelas futuras
 - Situação de pagamento e recebimento
+- Pagamento em lote das despesas pendentes do mês
 - Categorias personalizadas
 - Lançamentos recorrentes
-- Relatórios por período
-- Exportação de dados em CSV
+- Relatórios por período, média mensal e maiores despesas
+- Exportação de dados em CSV e PDF
+- Alteração de e-mail e senha dentro do aplicativo
+- Exclusão permanente da conta e dos dados
 - Interface responsiva para computador e celular
 - Dados isolados por usuário com Row Level Security
 
@@ -65,10 +69,26 @@ Acesse [http://localhost:3000](http://localhost:3000).
 
 1. Crie um projeto em [supabase.com](https://supabase.com/).
 2. Abra o **SQL Editor**.
-3. Execute o arquivo [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/001_initial_schema.sql).
+3. Execute os arquivos abaixo, nesta ordem:
+
+```text
+supabase/migrations/001_initial_schema.sql
+supabase/migrations/002_installments_and_account.sql
+```
+
 4. Copie a Project URL e a Publishable key para o `.env.local`.
 
 O SQL cria as tabelas e as políticas de segurança que permitem a cada usuário acessar somente os próprios dados.
+
+### Atualizar um projeto já configurado
+
+Se você já executou a migração `001`, abra o **SQL Editor** do Supabase e execute somente:
+
+```text
+supabase/migrations/002_installments_and_account.sql
+```
+
+Essa atualização adiciona os parcelamentos e a função segura usada para excluir a própria conta. Depois, publique novamente o projeto na Vercel.
 
 ### Autenticação
 

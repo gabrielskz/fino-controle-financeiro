@@ -10,9 +10,9 @@ export interface Database {
         Relationships: [];
       };
       entries: {
-        Row: { id: string; user_id: string; description: string; amount_cents: number; kind: string; category: string; status: string; due_date: string | null; reference_month: string; notes: string | null; recurrence_id: string | null; created_at: string; updated_at: string };
-        Insert: { id?: string; user_id?: string; description: string; amount_cents: number; kind: string; category: string; status?: string; due_date?: string | null; reference_month: string; notes?: string | null; recurrence_id?: string | null; created_at?: string; updated_at?: string };
-        Update: { id?: string; user_id?: string; description?: string; amount_cents?: number; kind?: string; category?: string; status?: string; due_date?: string | null; reference_month?: string; notes?: string | null; recurrence_id?: string | null; created_at?: string; updated_at?: string };
+        Row: { id: string; user_id: string; description: string; amount_cents: number; kind: string; category: string; status: string; due_date: string | null; reference_month: string; notes: string | null; recurrence_id: string | null; installment_group_id: string | null; installment_number: number | null; installment_total: number | null; created_at: string; updated_at: string };
+        Insert: { id?: string; user_id?: string; description: string; amount_cents: number; kind: string; category: string; status?: string; due_date?: string | null; reference_month: string; notes?: string | null; recurrence_id?: string | null; installment_group_id?: string | null; installment_number?: number | null; installment_total?: number | null; created_at?: string; updated_at?: string };
+        Update: { id?: string; user_id?: string; description?: string; amount_cents?: number; kind?: string; category?: string; status?: string; due_date?: string | null; reference_month?: string; notes?: string | null; recurrence_id?: string | null; installment_group_id?: string | null; installment_number?: number | null; installment_total?: number | null; created_at?: string; updated_at?: string };
         Relationships: [];
       };
       recurrences: {
@@ -23,9 +23,13 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      delete_own_account: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };
 }
-

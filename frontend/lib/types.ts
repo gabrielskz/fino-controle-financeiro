@@ -1,6 +1,6 @@
 export type EntryKind = "income" | "expense";
 export type EntryStatus = "pending" | "paid" | "received";
-export type AppView = "overview" | "categories" | "recurrences" | "reports";
+export type AppView = "overview" | "categories" | "recurrences" | "reports" | "settings";
 
 export interface Entry {
   id: string;
@@ -14,6 +14,9 @@ export interface Entry {
   reference_month: string;
   notes: string | null;
   recurrence_id: string | null;
+  installment_group_id: string | null;
+  installment_number: number | null;
+  installment_total: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -28,6 +31,14 @@ export interface EntryPayload {
   reference_month: string;
   notes: string | null;
   recurrence_id?: string | null;
+  installment_group_id?: string | null;
+  installment_number?: number | null;
+  installment_total?: number | null;
+}
+
+export interface EntrySubmission {
+  payload: EntryPayload;
+  installment_count: number;
 }
 
 export interface Category {
@@ -83,4 +94,3 @@ export interface MonthlyReport {
   expense_cents: number;
   balance_cents: number;
 }
-
