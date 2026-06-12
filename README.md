@@ -9,6 +9,7 @@ Aplicação web de controle financeiro pessoal para acompanhar receitas, despesa
 ## Funcionalidades
 
 - Cadastro, login e recuperação de senha
+- Opção para manter a sessão conectada no aparelho
 - Receitas e despesas mensais
 - Compras parceladas com criação automática das parcelas futuras
 - Situação de pagamento e recebimento

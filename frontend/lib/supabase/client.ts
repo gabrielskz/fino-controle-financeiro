@@ -3,6 +3,34 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 
 let client: ReturnType<typeof createSupabaseClient<Database>> | null = null;
+const persistencePreferenceKey = "fino-remember-session";
+
+function shouldRememberSession(): boolean {
+  return localStorage.getItem(persistencePreferenceKey) !== "false";
+}
+
+const authStorage = {
+  getItem(key: string) {
+    return shouldRememberSession() ? localStorage.getItem(key) : sessionStorage.getItem(key);
+  },
+  setItem(key: string, value: string) {
+    if (shouldRememberSession()) {
+      localStorage.setItem(key, value);
+      sessionStorage.removeItem(key);
+    } else {
+      sessionStorage.setItem(key, value);
+      localStorage.removeItem(key);
+    }
+  },
+  removeItem(key: string) {
+    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
+  },
+};
+
+export function setAuthPersistence(remember: boolean): void {
+  localStorage.setItem(persistencePreferenceKey, String(remember));
+}
 
 export function isSupabaseConfigured(): boolean {
   return Boolean(
@@ -25,6 +53,7 @@ export function createClient() {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
+      storage: authStorage,
     },
   });
   return client;

@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { ArrowLeft, CircleDollarSign, KeyRound, Mail } from "lucide-react";
 
-import { createClient } from "@/lib/supabase/client";
+import { createClient, setAuthPersistence } from "@/lib/supabase/client";
 
 type AuthMode = "login" | "signup" | "forgot";
 
@@ -25,6 +25,7 @@ export function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [remember, setRemember] = useState(true);
 
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode);
@@ -64,6 +65,7 @@ export function AuthScreen() {
         return;
       }
 
+      setAuthPersistence(remember);
       const { error: loginError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -134,6 +136,8 @@ export function AuthScreen() {
               <span className="mb-2 block text-sm font-semibold">Confirmar senha</span>
               <input type="password" required minLength={6} autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className="w-full rounded-2xl border border-[#d5d7cf] bg-white px-4 py-3.5 outline-none focus:border-[#66736b] focus:ring-4 focus:ring-[#d8ff65]/25" />
             </label>}
+
+            {mode === "login" && <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#d5d7cf] bg-white px-4 py-3.5"><input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} className="mt-0.5 h-4 w-4 accent-[#17231d]" /><span><strong className="block text-sm">Manter conectado neste aparelho</strong><small className="mt-1 block text-xs leading-relaxed text-[#747c77]">Você continuará conectado mesmo depois de fechar o navegador.</small></span></label>}
 
             {error && <p className="rounded-xl bg-[#fff0ed] px-4 py-3 text-sm font-medium text-[#a43f35]">{error}</p>}
             {message && <p className="rounded-xl bg-[#e7f5ec] px-4 py-3 text-sm font-medium text-[#276449]">{message}</p>}
