@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   title: "Fino | Controle financeiro",
   description: "Organize receitas, contas e planos em um so lugar.",
   applicationName: "Fino",
+  appleWebApp: {
+    capable: true,
+    title: "Fino",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
