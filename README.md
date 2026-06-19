@@ -76,6 +76,7 @@ Acesse [http://localhost:3000](http://localhost:3000).
 ```text
 supabase/migrations/001_initial_schema.sql
 supabase/migrations/002_installments_and_account.sql
+supabase/migrations/003_recurrence_exceptions.sql
 ```
 
 4. Copie a Project URL e a Publishable key para o `.env.local`.
@@ -88,9 +89,10 @@ Se você já executou a migração `001`, abra o **SQL Editor** do Supabase e ex
 
 ```text
 supabase/migrations/002_installments_and_account.sql
+supabase/migrations/003_recurrence_exceptions.sql
 ```
 
-Essa atualização adiciona os parcelamentos e a função segura usada para excluir a própria conta. Depois, publique novamente o projeto na Vercel.
+Execute somente os arquivos que ainda não foram aplicados. A migração `003` corrige a exclusão de lançamentos gerados por recorrências. Depois, publique novamente o projeto na Vercel.
 
 ### Autenticação
 

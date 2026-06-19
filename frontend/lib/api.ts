@@ -112,8 +112,16 @@ export async function materializeRecurrences(month: string): Promise<void> {
   throwIfError(existingError);
   const generated = new Set((existing ?? []).map((item) => item.recurrence_id));
 
+  const { data: exceptions, error: exceptionsError } = await supabase
+    .from("recurrence_exceptions")
+    .select("recurrence_id")
+    .eq("reference_month", month)
+    .in("recurrence_id", ids);
+  throwIfError(exceptionsError);
+  const skipped = new Set((exceptions ?? []).map((item) => item.recurrence_id));
+
   const missing = (recurrences as Recurrence[])
-    .filter((item) => !generated.has(item.id))
+    .filter((item) => !generated.has(item.id) && !skipped.has(item.id))
     .map((item) => ({
       description: item.description,
       amount_cents: item.amount_cents,
@@ -230,9 +238,29 @@ export async function updateEntry(id: string, payload: Partial<EntryPayload>): P
   return data as Entry;
 }
 
-export async function deleteEntry(id: string): Promise<void> {
-  const { error } = await createClient().from("entries").delete().eq("id", id);
+export async function deleteEntry(entry: Pick<Entry, "id" | "recurrence_id" | "reference_month">): Promise<void> {
+  const supabase = createClient();
+  if (entry.recurrence_id) {
+    const { error: exceptionError } = await supabase
+      .from("recurrence_exceptions")
+      .upsert(
+        {
+          recurrence_id: entry.recurrence_id,
+          reference_month: entry.reference_month,
+        },
+        { onConflict: "user_id,recurrence_id,reference_month" },
+      );
+    throwIfError(exceptionError);
+  }
+
+  const { data, error } = await supabase
+    .from("entries")
+    .delete()
+    .eq("id", entry.id)
+    .select("id")
+    .maybeSingle();
   throwIfError(error);
+  if (!data) throw new Error("O lançamento não foi encontrado ou não pôde ser excluído.");
 }
 
 export async function markMonthExpensesPaid(month: string): Promise<number> {
