@@ -127,8 +127,8 @@ function EntryRow({ entry, onEdit, onDelete, onToggle }: { entry: Entry; onEdit:
   return <div className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-l-4 border-b-[#e7e8e2] px-4 py-4 last:border-b-0 sm:grid-cols-[auto_minmax(0,1fr)_115px_auto] sm:px-6 ${complete ? "border-l-[#68b890]" : "border-l-[#d9867c] bg-[#fff8f6]"}`}>
     <button onClick={onToggle} aria-label={complete ? "Marcar como pendente" : "Marcar como concluído"} className={`flex h-10 w-10 items-center justify-center rounded-xl ${entry.kind === "income" ? "bg-[#e4f4ec] text-[#287055]" : "bg-[#f8e9e6] text-[#a94c40]"}`}>{entry.kind === "income" ? <ArrowDownLeft size={18} /> : <ArrowUpRight size={18} />}</button>
     <div className="min-w-0">
-      <div className="flex min-w-0 items-center gap-2">
-        <p className="min-w-0 flex-1 truncate text-sm font-semibold">{entry.description}</p>
+      <div className="flex min-w-0 items-start gap-2">
+        <p className="min-w-0 flex-1 break-words text-sm font-semibold leading-snug sm:truncate">{entry.description}</p>
         <span className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold ${complete ? "bg-[#e4f4ec] text-[#287055]" : "bg-[#f8e9e6] text-[#a94c40]"}`}>{complete ? <Check size={11} /> : <Clock3 size={11} />}{statusLabel}</span>
       </div>
       <div className="mt-1 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-xs leading-relaxed text-[#858c87]">
