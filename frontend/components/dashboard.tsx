@@ -131,7 +131,11 @@ function EntryRow({ entry, onEdit, onDelete, onToggle }: { entry: Entry; onEdit:
         <p className="min-w-0 flex-1 truncate text-sm font-semibold">{entry.description}</p>
         <span className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold ${complete ? "bg-[#e4f4ec] text-[#287055]" : "bg-[#f8e9e6] text-[#a94c40]"}`}>{complete ? <Check size={11} /> : <Clock3 size={11} />}{statusLabel}</span>
       </div>
-      <p className="mt-1 truncate text-xs text-[#858c87]">{entry.category} · {formatDate(entry.due_date)}{entry.installment_number && entry.installment_total ? ` · Parcela ${entry.installment_number}/${entry.installment_total}` : ""}</p>
+      <div className="mt-1 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-xs leading-relaxed text-[#858c87]">
+        <span className="min-w-0 break-words">{entry.category}</span>
+        <span className="shrink-0">· {formatDate(entry.due_date)}</span>
+        {entry.installment_number && entry.installment_total ? <span className="shrink-0">· Parcela {entry.installment_number}/{entry.installment_total}</span> : null}
+      </div>
     </div>
     <p className={`text-right text-sm font-bold ${entry.kind === "income" ? "text-[#287055]" : ""}`}>{entry.kind === "income" ? "+" : "-"} {formatCurrency(entry.amount_cents)}</p>
     <div className="col-start-2 flex justify-end gap-1 sm:col-auto"><button onClick={onEdit} aria-label="Editar lançamento" className="rounded-lg p-2 text-[#7c847f] hover:bg-[#eceee8]"><Pencil size={15} /></button><button onClick={onDelete} aria-label="Excluir lançamento" className="rounded-lg p-2 text-[#9b7c77] hover:bg-[#fff0ed]"><Trash2 size={15} /></button></div>
