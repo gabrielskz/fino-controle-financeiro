@@ -50,8 +50,8 @@ export function RecurrencesView({ categories, onCreateCategory, onChanged }: Rec
   }
 
   async function remove(item: Recurrence) {
-    if (!window.confirm(`Excluir a recorrência "${item.description}"?`)) return;
-    await deleteRecurrence(item.id);
+    if (!window.confirm(`Excluir a recorrência "${item.description}"?\n\nOs lançamentos deste mês em diante serão removidos. Meses anteriores ficam no histórico.`)) return;
+    await deleteRecurrence(item.id, currentMonth());
     await load();
     await onChanged();
   }

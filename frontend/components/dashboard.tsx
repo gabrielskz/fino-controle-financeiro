@@ -81,7 +81,24 @@ export function Dashboard({ user }: { user: User }) {
     try { await markMonthExpensesPaid(month); await reloadDashboard(); } catch (caught) { setError(errorMessage(caught)); }
   }
 
-  async function removeEntry(entry: Entry) { const question = entry.recurrence_id ? `Remover "${entry.description}" somente de ${formatMonth(entry.reference_month)}? A recorrência continuará nos próximos meses.` : `Remover "${entry.description}"?`; if (!window.confirm(question)) return; try { await deleteEntry(entry); await reloadDashboard(); } catch (caught) { setError(errorMessage(caught)); } }
+  async function removeEntry(entry: Entry) {
+    let scope: "month" | "future" | "similar-future" = "month";
+
+    if (entry.recurrence_id) {
+      const removeFuture = window.confirm(`"${entry.description}" é recorrente.\n\nOK: remover de ${formatMonth(entry.reference_month)} em diante\nCancelar: remover somente este mês`);
+      if (removeFuture) scope = "future";
+      else if (!window.confirm(`Remover "${entry.description}" somente de ${formatMonth(entry.reference_month)}? A recorrência continuará nos próximos meses.`)) return;
+    } else {
+      const removeOnly = window.confirm(`Remover "${entry.description}"?\n\nOK: remover somente este lançamento\nCancelar: ver opção para limpar lançamentos iguais nos próximos meses`);
+      if (!removeOnly) {
+        const removeSimilar = window.confirm(`Remover todos os lançamentos iguais a "${entry.description}" de ${formatMonth(entry.reference_month)} em diante?\n\nSerão removidos apenas lançamentos sem recorrência vinculada com a mesma descrição, valor, tipo e categoria.`);
+        if (!removeSimilar) return;
+        scope = "similar-future";
+      }
+    }
+
+    try { await deleteEntry(entry, scope); await reloadDashboard(); } catch (caught) { setError(errorMessage(caught)); }
+  }
   async function toggleStatus(entry: Entry) { const status = entry.kind === "expense" ? entry.status === "paid" ? "pending" : "paid" : entry.status === "received" ? "pending" : "received"; try { await updateEntry(entry.id, { status }); await reloadDashboard(); } catch (caught) { setError(errorMessage(caught)); } }
 
   async function addCategory(name: string, kind: EntryKind, color = "#8fd3b6") { const created = await createCategory(name, kind, color); await reloadCategories(); return created; }

@@ -238,8 +238,69 @@ export async function updateEntry(id: string, payload: Partial<EntryPayload>): P
   return data as Entry;
 }
 
-export async function deleteEntry(entry: Pick<Entry, "id" | "recurrence_id" | "reference_month">): Promise<void> {
+async function stopRecurrenceFromMonth(recurrenceId: string, month: string): Promise<void> {
   const supabase = createClient();
+
+  const { data: recurrence, error: recurrenceError } = await supabase
+    .from("recurrences")
+    .select("start_month")
+    .eq("id", recurrenceId)
+    .maybeSingle();
+  throwIfError(recurrenceError);
+
+  const { error: entriesError } = await supabase
+    .from("entries")
+    .delete()
+    .eq("recurrence_id", recurrenceId)
+    .gte("reference_month", month);
+  throwIfError(entriesError);
+
+  if (!recurrence) return;
+
+  if (recurrence.start_month >= month) {
+    const { error } = await supabase.from("recurrences").delete().eq("id", recurrenceId);
+    throwIfError(error);
+    return;
+  }
+
+  const { error: exceptionsError } = await supabase
+    .from("recurrence_exceptions")
+    .delete()
+    .eq("recurrence_id", recurrenceId)
+    .gte("reference_month", month);
+  throwIfError(exceptionsError);
+
+  const { error: updateError } = await supabase
+    .from("recurrences")
+    .update({ end_month: shiftEntryMonth(month, -1), active: false })
+    .eq("id", recurrenceId);
+  throwIfError(updateError);
+}
+
+export async function deleteEntry(
+  entry: Pick<Entry, "id" | "description" | "amount_cents" | "kind" | "category" | "recurrence_id" | "reference_month">,
+  scope: "month" | "future" | "similar-future" = "month",
+): Promise<void> {
+  const supabase = createClient();
+  if (entry.recurrence_id && scope === "future") {
+    await stopRecurrenceFromMonth(entry.recurrence_id, entry.reference_month);
+    return;
+  }
+
+  if (scope === "similar-future") {
+    const { error } = await supabase
+      .from("entries")
+      .delete()
+      .eq("description", entry.description)
+      .eq("amount_cents", entry.amount_cents)
+      .eq("kind", entry.kind)
+      .eq("category", entry.category)
+      .is("recurrence_id", null)
+      .gte("reference_month", entry.reference_month);
+    throwIfError(error);
+    return;
+  }
+
   if (entry.recurrence_id) {
     const { error: exceptionError } = await supabase
       .from("recurrence_exceptions")
@@ -302,7 +363,15 @@ export async function updateRecurrence(id: string, payload: Partial<RecurrencePa
   return data as Recurrence;
 }
 
-export async function deleteRecurrence(id: string): Promise<void> {
-  const { error } = await createClient().from("recurrences").delete().eq("id", id);
+export async function deleteRecurrence(id: string, fromMonth: string): Promise<void> {
+  const supabase = createClient();
+  const { error: entriesError } = await supabase
+    .from("entries")
+    .delete()
+    .eq("recurrence_id", id)
+    .gte("reference_month", fromMonth);
+  throwIfError(entriesError);
+
+  const { error } = await supabase.from("recurrences").delete().eq("id", id);
   throwIfError(error);
 }
